@@ -1,0 +1,2 @@
+# CLEANMASK-V3
+Detector y Limpiador de SEMITRANSPARENCIAS
