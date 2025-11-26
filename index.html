@@ -28,7 +28,8 @@ button.action-btn{padding:10px;background:linear-gradient(to bottom,#00bfff,#006
 button.action-btn:hover{background:linear-gradient(to bottom,#006f9a,#00bfff);box-shadow:0 0 10px #00bfff}
 button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 #msg{text-align:center;font-weight:bold;font-size:14px}
-#exportMsg{display:none}
+#exportMsg{display:flex;justify-content:center;}
+#loader{display:none;margin:20px auto;text-align:center;}
 @media(max-width:900px){.main-panel{flex-direction:column;align-items:center}.sidebar{width:90%;margin-top:20px}.viewers{flex-direction:column;gap:20px}.viewer{width:90%;height:400px}}
 </style>
 </head>
@@ -36,43 +37,32 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 
 <!-- LOGIN -->
 <div id="loginContainer">
-  <h1>CLEANMASK – Login</h1><br><br>
-  <p>Detector y corrector de semitransparencias</p>
-
-  <input type="text" id="username" placeholder="Usuario">
-  <input type="password" id="password" placeholder="Contraseña">
-  <button onclick="login()">Ingresar</button>
-  <p id="loginMsg"></p>
-
-  <p style="color:white; text-align:center; margin-top:15px; font-size:11px;">
-    Estamos ofreciendo acceso exclusivo a nuestra aplicación con una pequeña colaboración de $2200 mensuales (2usd).<br>
-    MUCHAS GRACIAS a todas aquellas personas que ya se sumaron y apoyan nuestro trabajo.<br><br>
-    ATTE STAFF<br>
-    EDITABLEAGRAFICOS<br><br>
-  </p>
-
-  <a href="whatsapp://send?phone=5492613904628&text=Buen%20dia%21%20estoy%20interesado%2Fa%20en%20un%20dise%C3%B1o%20o%20servicio" 
-     style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#25D366; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">
-    Solicitar suscripción
-  </a>
-
-  <iframe 
-    width="560" 
-    height="315"
-    src="https://www.youtube.com/embed/1f2IQqyMXN0" 
-    title="YouTube video player" 
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-  </iframe>
+<h1>CLEANMASK – Login</h1>
+<br>Detector y corrector de semitransparencias</br>
+<input type="text" id="username" placeholder="Usuario">
+<input type="password" id="password" placeholder="Contraseña">
+<button onclick="login()">Ingresar</button>
+<p id="loginMsg"></p>
+<p style="color:white; text-align:center; margin-top:15px; font-size:11px;">
+      Estamos ofreciendo acceso exclusivo a nuestra aplicación con una pequeña colaboración de $2200 mensuales (2usd).
+      </br>MUCHAS GRACIAS a todas aquellas personas que ya se sumaron y apoyan nuestro trabajo.
+ </br> </br>
+      ATTE STAFF
+      EDITABLEAGRAFICOS
+</br> </br>
+   <a href="whatsapp://send?phone=5492613904628&text=Buen%20dia%21%20estoy%20interesado%2Fa%20en%20un%20dise%C3%B1o%20o%20servicio" 
+       style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#25D366; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">
+      Solicitar suscripción
+    </a>
+</p>
 </div>
 
-<!-- APP ORIGINAL -->
+<!-- APP -->
 <div id="appContainer">
-
 <h1>CLEANMASK</h1>
 <h2 class="subtitle">Detector y Corrector de Semitransparencias – by editablesgraficos</h2>
 <input type="file" id="fileInput" accept="image/*">
+<div id="loader">⏳ Procesando imagen...</div>
 
 <div class="main-panel">
 <div class="canvas-panel">
@@ -91,16 +81,13 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 <div class="sidebar">
 <h3 id="msg">Sube una imagen para analizar</h3>
 <div class="buttons">
-<button id="cleanBtn" class="action-btn" style="display:none;">🧹 Quitar Semitransparencias</button>
+<button id="cleanBtn" class="action-btn" style="display:none;">🧹 Limpiar imagen</button>
 </div>
 <div id="exportMsg">
-LISTO! TU IMAGEN ESTA LISTA PARA SER EXPORTADA
-<br>
 <button id="exportBtn" class="action-btn" style="display:none;">💾 Exportar PNG 300 DPI</button>
 </div>
 </div>
 </div>
-
 </div>
 
 <!-- LOGIN SCRIPT -->
@@ -111,7 +98,7 @@ const users = {
   "USR003": "bW9jOXQ1c2E=",
   "USR004": "ajk3bWQzcGI=",
   "USR005": "dTY1cGoxczQ=",
-  "USR006": "cDhzNHIwYmE=",
+  "USR006": "cDhzNHIwcGJh",
   "USR007": "aGg4cDQ1eW0=",
   "USR008": "dXMwOWg2cHQ=",
   "USR009": "dWw4djJyMG0=",
@@ -126,7 +113,7 @@ const users = {
   "USR018": "b3M3dnQ0cHc=",
   "USR019": "dWw4dzJyMG0=",
   "USR020": "cG04aHIzcGY=",
-  "USR021": "a2tQT0wxMzg=",
+  "USR021": "a2tQTE8xMzg=",
   "USR022": "dXg3aHI1cHk=",
   "USR023": "c3U3bm0wY3E=",
   "USR024": "aW8yNmlyNXg=",
@@ -146,7 +133,7 @@ function login() {
 }
 </script>
 
-<!-- SCRIPTMASK -->
+<!-- SCRIPT MASK -->
 <script>
 const fileInput=document.getElementById('fileInput');
 const msg=document.getElementById('msg');
@@ -156,144 +143,152 @@ const canvasS=document.getElementById('canvasSemi');
 const ctxS=canvasS.getContext('2d');
 const cleanBtn=document.getElementById('cleanBtn');
 const exportBtn=document.getElementById('exportBtn');
-const exportMsg=document.getElementById('exportMsg');
+const loader=document.getElementById('loader');
 let originalImg=new Image();
-let hasSemi=false;
 let processedImageData=null;
 
 fileInput.addEventListener('change',e=>{
-const file=e.target.files[0];
-if(!file)return;
-const url=URL.createObjectURL(file);
-originalImg.onload=()=>{
-canvasO.width=originalImg.width;
-canvasO.height=originalImg.height;
-canvasS.width=originalImg.width;
-canvasS.height=originalImg.height;
-drawImageFit(ctxO,originalImg,canvasO.width,canvasO.height);
-detectSemis();
-};
-originalImg.src=url;
+  const file=e.target.files[0];
+  if(!file) return;
+  loader.style.display='block';
+  const url=URL.createObjectURL(file);
+  originalImg.onload=()=>{
+    canvasO.width=originalImg.width;
+    canvasO.height=originalImg.height;
+    canvasS.width=originalImg.width;
+    canvasS.height=originalImg.height;
+    drawImageFit(ctxO,originalImg,canvasO.width,canvasO.height);
+    detectSemis();
+    loader.style.display='none';
+  };
+  originalImg.src=url;
 });
 
 function drawImageFit(ctx,img,cw,ch){
-ctx.clearRect(0,0,cw,ch);
-const ratio=Math.min(cw/img.width,ch/img.height);
-const w=img.width*ratio;
-const h=img.height*ratio;
-const x=(cw-w)/2;
-const y=(ch-h)/2;
-ctx.drawImage(img,x,y,w,h);
+  ctx.clearRect(0,0,cw,ch);
+  const ratio=Math.min(cw/img.width,ch/img.height);
+  const w=img.width*ratio;
+  const h=img.height*ratio;
+  const x=(cw-w)/2;
+  const y=(ch-h)/2;
+  ctx.drawImage(img,x,y,w,h);
 }
 
 function detectSemis(){
-const imgData=ctxO.getImageData(0,0,canvasO.width,canvasO.height);
-const d=imgData.data;
-hasSemi=false;
-for(let i=0;i<d.length;i+=4){
-const a=d[i+3];
-if(a>0&&a<255){hasSemi=true;break;}
+  const imgData=ctxO.getImageData(0,0,canvasO.width,canvasO.height);
+  const d=imgData.data;
+  let hasSemi=false;
+  for(let i=0;i<d.length;i+=4){
+    const a=d[i+3];
+    if(a>0&&a<255){hasSemi=true;break;}
+  }
+  if(!hasSemi){
+    msg.innerHTML='<span style="color:#4CAF50; font-size:25px;">✅ ESTA IMAGEN ESTA LIMPIA</span><br>Apta para imprimir!';
+    cleanBtn.style.display='none';
+    exportBtn.style.display='none'; // <-- exportBtn oculto si no hay semitransparencias
+    ctxS.clearRect(0,0,canvasS.width,canvasS.height);
+    return;
+  }
+  msg.innerHTML='<span style="color:#F44336; font-size:25px;">❌ IMAGEN NO APTA PARA IMPRIMIR</span><br>En el visor 2 se pueden ver los píxeles excedentes en blanco.';
+  ctxS.clearRect(0,0,canvasS.width,canvasS.height);
+  ctxS.globalAlpha=0.3;
+  drawImageFit(ctxS,originalImg,canvasS.width,canvasS.height);
+  ctxS.globalAlpha=1;
+  const semiMask=ctxS.getImageData(0,0,canvasS.width,canvasS.height);
+  const m=semiMask.data;
+  for(let i=0;i<m.length;i+=4){
+    const a=d[i+3];
+    if(a>0 && a<255){
+      m[i]=m[i+1]=m[i+2]=255;
+      m[i+3]=255;
+    } else { m[i+3]=0; }
+  }
+  ctxS.putImageData(semiMask,0,0);
+  cleanBtn.style.display='flex';
+  cleanBtn.disabled=false;
+  exportBtn.style.display='none';
 }
-if(!hasSemi){
-msg.innerHTML='<span style="color:#4CAF50;">✅ ESTA IMAGEN ESTA LIMPIA, LIBRE DE SEMITRANSPARENCIAS</span><br>Apta para imprimir!';
-cleanBtn.style.display='none';
-exportMsg.style.display='none';
-ctxS.clearRect(0,0,canvasS.width,canvasS.height);
-return;
-}
-msg.innerHTML='<span style="color:#F44336;">❌ LA IMAGEN CONTIENE SEMITRANSPARENCIAS</span><br>En el visor 2 se puede ver los píxeles excedentes (suciedad) en color blanco que aparecerían al imprimir y estampar.';
-ctxS.clearRect(0,0,canvasS.width,canvasS.height);
-ctxS.globalAlpha=0.3;
-drawImageFit(ctxS,originalImg,canvasS.width,canvasS.height);
-ctxS.globalAlpha=1;
-const semiMask=ctxS.getImageData(0,0,canvasS.width,canvasS.height);
-const m=semiMask.data;
-for(let i=0;i<m.length;i+=4){
-const a=d[i+3];
-if(a>0&&a<255){
-m[i]=m[i+1]=m[i+2]=255;
-m[i+3]=255;
-}else{m[i+3]=0;}
-}
-ctxS.putImageData(semiMask,0,0);
-cleanBtn.style.display='flex';
-cleanBtn.disabled=false;
-exportMsg.style.display='none';
-exportBtn.style.display='none';
-}
+
 
 cleanBtn.addEventListener('click',()=>{
-const imgData=ctxO.getImageData(0,0,canvasO.width,canvasO.height);
-const d=imgData.data;
-for(let i=0;i<d.length;i+=4){
-if(d[i+3]>0&&d[i+3]<255)d[i+3]=0;
-}
-ctxO.putImageData(imgData,0,0);
-processedImageData=imgData;
-ctxS.clearRect(0,0,canvasS.width,canvasS.height);
-msg.innerHTML='<span style="color:#4CAF50;">✅ SEMITRANSPARENCIAS ELIMINADAS.</span>';
-exportMsg.style.display='block';
-exportBtn.style.display='flex';
-exportBtn.disabled=false;
+  const imgData = ctxO.getImageData(0,0,canvasO.width,canvasO.height);
+  const d = imgData.data;
+  
+  for(let i=0; i<d.length; i+=4){
+    const alpha = d[i+3];
+    if(alpha > 0 && alpha < 255){
+      d[i+3] = 255;
+    }
+  }
+
+  ctxO.putImageData(imgData,0,0);
+  processedImageData = imgData;
+
+  ctxS.clearRect(0,0,canvasS.width,canvasS.height);
+  msg.innerHTML='<span style="color:#4CAF50;">✅ SEMITRANSPARENCIAS LIMPIAS! TU IMAGEN YA ESTA LISTA PARA SER EXPORTADA</span>';
+  cleanBtn.style.display='none';
+  exportBtn.style.display='flex';
+  exportBtn.disabled=false;
 });
 
+// EXPORTAR PNG 300 DPI
 exportBtn.addEventListener('click',()=>{exportPNG300();});
 
 function exportPNG300(){
-const url=canvasO.toDataURL("image/png");
-const bin=atob(url.split(',')[1]);
-const arr=new Uint8Array(bin.length);
-for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-const dpi=300;
-const ppm=Math.round(dpi/0.0254);
-const phys=new Uint8Array([(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,1]);
-const name=new TextEncoder().encode("pHYs");
-const chunk=buildChunk(name,phys);
-const finalPNG=insertAfterIHDR(arr,chunk);
-const blob=new Blob([finalPNG],{type:"image/png"});
-const a=document.createElement('a');
-a.href=URL.createObjectURL(blob);
-a.download="cleaned_300dpi.png";
-a.click();
+  const url=canvasO.toDataURL("image/png");
+  const bin=atob(url.split(',')[1]);
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  const dpi=300;
+  const ppm=Math.round(dpi/0.0254);
+  const phys=new Uint8Array([(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,1]);
+  const name=new TextEncoder().encode("pHYs");
+  const chunk=buildChunk(name,phys);
+  const finalPNG=insertAfterIHDR(arr,chunk);
+  const blob=new Blob([finalPNG],{type:"image/png"});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download="cleaned_300dpi.png";
+  a.click();
 }
 
 function buildChunk(type,data){
-const len=data.length;
-const chunk=new Uint8Array(8+len+4);
-chunk[0]=0;chunk[1]=0;chunk[2]=0;chunk[3]=len;
-chunk.set(type,4);
-chunk.set(data,8);
-const crc=crc32(chunk.slice(4,8+len));
-chunk[8+len]=(crc>>>24)&255;
-chunk[9+len]=(crc>>>16)&255;
-chunk[10+len]=(crc>>>8)&255;
-chunk[11+len]=crc&255;
-return chunk;
+  const len=data.length;
+  const chunk=new Uint8Array(8+len+4);
+  chunk[0]=0;chunk[1]=0;chunk[2]=0;chunk[3]=len;
+  chunk.set(type,4);
+  chunk.set(data,8);
+  const crc=crc32(chunk.slice(4,8+len));
+  chunk[8+len]=(crc>>>24)&255;
+  chunk[9+len]=(crc>>>16)&255;
+  chunk[10+len]=(crc>>>8)&255;
+  chunk[11+len]=crc&255;
+  return chunk;
 }
 
 function insertAfterIHDR(png,chunk){
-let pos=8;
-const ihdrLen=(png[pos]<<24)|(png[pos+1]<<16)|(png[pos+2]<<8)|png[pos+3];
-const after=pos+12+ihdrLen;
-const out=new Uint8Array(png.length+chunk.length);
-out.set(png.slice(0,after),0);
-out.set(chunk,after);
-out.set(png.slice(after),after+chunk.length);
-return out;
+  let pos=8;
+  const ihdrLen=(png[pos]<<24)|(png[pos+1]<<16)|(png[pos+2]<<8)|png[pos+3];
+  const after=pos+12+ihdrLen;
+  const out=new Uint8Array(png.length+chunk.length);
+  out.set(png.slice(0,after),0);
+  out.set(chunk,after);
+  out.set(png.slice(after),after+chunk.length);
+  return out;
 }
 
 function crc32(buf){
-let table=[];
-for(let i=0;i<256;i++){
-let c=i;
-for(let k=0;k<8;k++)c=((c&1)?(0xEDB88320^(c>>>1)):(c>>>1));
-table[i]=c;
-}
-let crc=-1;
-for(let i=0;i<buf.length;i++)crc=(crc>>>8)^table[(crc^buf[i])&255];
-return(crc^(-1))>>>0;
+  let table=[];
+  for(let i=0;i<256;i++){
+    let c=i;
+    for(let k=0;k<8;k++)c=((c&1)?(0xEDB88320^(c>>>1)):(c>>>1));
+    table[i]=c;
+  }
+  let crc=-1;
+  for(let i=0;i<buf.length;i++)crc=(crc>>>8)^table[(crc^buf[i])&255];
+  return(crc^(-1))>>>0;
 }
 </script>
-
 </body>
 </html>
+
