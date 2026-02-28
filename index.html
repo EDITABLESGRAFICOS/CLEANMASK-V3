@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -53,31 +56,14 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 <!-- LOGIN -->
 <div id="loginContainer">
 <h1>CLEANMASK V4.0</h1>
-<div style="text-align:center;">
-  Detector y corrector para imagenes con semitransparencias<br>
-  Exclusivo para DTF/Semitonos
-</div>
+
 <input type="text" id="username" placeholder="Usuario">
 <input type="password" id="password" placeholder="Contraseña">
 <button onclick="login()">Ingresar</button>
 <p id="loginMsg"></p>
-<div style="
-  margin-top:15px;
-  font-family:Arial, sans-serif;
-  text-align:center;
-  width:90%;
-  margin-left:auto;
-  margin-right:auto;
-">
+</div>
 
-<div style="
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  gap:15px;
-  margin-top:15px;
-  font-family:Arial, sans-serif;
-">
+
 
   <!-- TABLA -->
   <div style="width:50%; text-align:center;">
@@ -135,10 +121,7 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
     </iframe>
   </div>
 
-</div>
-
-
-
+  
 <!-- APP -->
 <div id="appContainer">
 
@@ -154,12 +137,12 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 <div class="viewers">
 
 <div class="viewer">
-<h3>🖼️ Visor 1 – Original</h3>
+<h3>🖼️ Original</h3>
 <canvas id="canvasOriginal"></canvas>
 </div>
 
 <div class="viewer">
-<h3>💡 Visor 2 – Píxeles a eliminar</h3>
+<h3>💡 Semitransparencias</h3>
 <canvas id="canvasSemi"></canvas>
 </div>
 
@@ -183,7 +166,9 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 
 <!-- LOGIN SCRIPT -->
 <script>
+
 const users = {
+
 "USR001":"c2QzM2gyMGs=",
 "USR002":"eTdwMWJqNGE=",
 "USR003":"bW9jOXQ1c2E=",
@@ -236,11 +221,17 @@ const user=document.getElementById("username").value.trim();
 const pass=document.getElementById("password").value.trim();
 const loginMsg=document.getElementById("loginMsg");
 
+try{
 if(users[user] && atob(users[user])===pass){
 document.getElementById("loginContainer").style.display="none";
 document.getElementById("appContainer").style.display="block";
-}else{
+}
+else{
 loginMsg.textContent="Usuario o contraseña incorrectos";
+}
+}catch(e){
+loginMsg.textContent="Error en credenciales";
+console.error(e);
 }
 }
 </script>
@@ -268,7 +259,6 @@ const file=e.target.files[0];
 if(!file) return;
 
 loader.style.display='block';
-
 const url=URL.createObjectURL(file);
 
 originalImg.onload=()=>{
@@ -278,11 +268,9 @@ canvasS.width=originalImg.width;
 canvasS.height=originalImg.height;
 
 ctxO.drawImage(originalImg,0,0);
-
 detectSemis();
 loader.style.display='none';
 };
-
 originalImg.src=url;
 });
 
@@ -297,14 +285,14 @@ if(a>0 && a<255){hasSemi=true;break;}
 }
 
 if(!hasSemi){
-msg.innerHTML='<span style="color:#4CAF50;font-size:20px;">✅ IMAGEN LIMPIA</span>';
+msg.innerHTML='<span style="color:#4CAF50;">✅ IMAGEN LIMPIA</span>';
 cleanBtn.style.display='none';
 exportBtn.style.display='none';
 ctxS.clearRect(0,0,canvasS.width,canvasS.height);
 return;
 }
 
-msg.innerHTML='<span style="color:#F44336;font-size:20px;">❌ CONTIENE SEMITRANSPARENCIAS</span>';
+msg.innerHTML='<span style="color:#F44336;">❌ CONTIENE SEMITRANSPARENCIAS</span>';
 
 const mask=ctxS.createImageData(canvasS.width,canvasS.height);
 const m=mask.data;
@@ -328,7 +316,6 @@ const d=imgData.data;
 
 for(let i=0;i<d.length;i+=4){
 const a=d[i+3];
-
 if(a>=LOW_ALPHA && a<=HIGH_ALPHA){
 d[i+3]=0;
 }
@@ -340,77 +327,22 @@ d[i+3]=255;
 ctxO.putImageData(imgData,0,0);
 ctxS.clearRect(0,0,canvasS.width,canvasS.height);
 
-msg.innerHTML='<span style="color:#4CAF50;">✅ LIMPIEZA APLICADA haga clic en exportar para descargarla</span>';
+msg.innerHTML='<span style="color:#4CAF50;">✅ LIMPIEZA APLICADA</span>';
 cleanBtn.style.display='none';
 exportBtn.style.display='flex';
 });
 
-exportBtn.addEventListener('click',()=>exportPNG300());
-
-function exportPNG300(){
-const url=canvasO.toDataURL("image/png");
-const bin=atob(url.split(',')[1]);
-const arr=new Uint8Array(bin.length);
-for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-
-const dpi=300;
-const ppm=Math.round(dpi/0.0254);
-
-const phys=new Uint8Array([
-(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,
-(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,
-1
-]);
-
-const name=new TextEncoder().encode("pHYs");
-const chunk=buildChunk(name,phys);
-const finalPNG=insertAfterIHDR(arr,chunk);
-
-const blob=new Blob([finalPNG],{type:"image/png"});
+exportBtn.addEventListener('click',()=>{
 const a=document.createElement('a');
-a.href=URL.createObjectURL(blob);
+a.href=canvasO.toDataURL("image/png");
 a.download="cleaned_300dpi.png";
 a.click();
-}
+});
 
-function buildChunk(type,data){
-const len=data.length;
-const chunk=new Uint8Array(8+len+4);
-chunk[3]=len;
-chunk.set(type,4);
-chunk.set(data,8);
-const crc=crc32(chunk.slice(4,8+len));
-chunk[8+len]=(crc>>>24)&255;
-chunk[9+len]=(crc>>>16)&255;
-chunk[10+len]=(crc>>>8)&255;
-chunk[11+len]=crc&255;
-return chunk;
-}
-
-function insertAfterIHDR(png,chunk){
-let pos=8;
-const ihdrLen=(png[pos]<<24)|(png[pos+1]<<16)|(png[pos+2]<<8)|png[pos+3];
-const after=pos+12+ihdrLen;
-const out=new Uint8Array(png.length+chunk.length);
-out.set(png.slice(0,after),0);
-out.set(chunk,after);
-out.set(png.slice(after),after+chunk.length);
-return out;
-}
-
-function crc32(buf){
-let table=[];
-for(let i=0;i<256;i++){
-let c=i;
-for(let k=0;k<8;k++)c=((c&1)?(0xEDB88320^(c>>>1)):(c>>>1));
-table[i]=c;
-}
-let crc=-1;
-for(let i=0;i<buf.length;i++)crc=(crc>>>8)^table[(crc^buf[i])&255];
-return(crc^(-1))>>>0;
-}
 </script>
 
 </body>
 </html>
+
+
 
