@@ -14,7 +14,7 @@ body{margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#1e1e
 
 #appContainer{display:none;}
 
-h1{text-align:center;font-size:36px;color:#00bfff;text-shadow:0 0 10px #00bfff;margin-bottom:5px}
+h1{text-align:center;font-size:36px;color:#00bfff;margin-bottom:5px}
 h2.subtitle{text-align:center;font-size:18px;color:#00ffff;margin-bottom:20px;font-weight:normal}
 
 #fileInput{display:block;margin:0 auto 20px auto;padding:10px 15px;border-radius:5px;border:none;background:#333;color:white;font-size:16px;cursor:pointer}
@@ -52,18 +52,101 @@ button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 
 <!-- LOGIN -->
 <div id="loginContainer">
-<h1>CLEANMASK – Login</h1>
-Detector y corrector de semitransparencias
+<h1>CLEANMASK V4.0</h1>
+<div style="text-align:center;">
+  Detector y corrector para imagenes con semitransparencias<br>
+  Exclusivo para DTF/Semitonos
+</div>
 <input type="text" id="username" placeholder="Usuario">
 <input type="password" id="password" placeholder="Contraseña">
 <button onclick="login()">Ingresar</button>
 <p id="loginMsg"></p>
+<div style="
+  margin-top:15px;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  width:90%;
+  margin-left:auto;
+  margin-right:auto;
+">
+
+  <h4 style="margin-bottom:8px;">
+    Upgrade v4.0 28/02/2026
+  </h4>
+
+<div style="
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:15px;
+  margin-top:15px;
+  font-family:Arial, sans-serif;
+">
+
+  <!-- TABLA -->
+  <div style="width:50%; text-align:center;">
+    
+    <h4 style="margin-bottom:6px;">
+      Upgrade v4.0 28/02/2026
+    </h4>
+
+    <table style="
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+    ">
+      <thead>
+        <tr style="background:#111; color:#fff;">
+          <th style="padding:4px; border:1px solid #444;">Mejora</th>
+          <th style="padding:4px; border:1px solid #444;">Beneficio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:4px; border:1px solid #444;">Normalización Alpha</td>
+          <td style="padding:4px; border:1px solid #444;">Elimina ghost pixels</td>
+        </tr>
+        <tr>
+          <td style="padding:4px; border:1px solid #444;">Opacidad Forzada</td>
+          <td style="padding:4px; border:1px solid #444;">Bordes sin halos</td>
+        </tr>
+        <tr>
+          <td style="padding:4px; border:1px solid #444;">Alpha Binario</td>
+          <td style="padding:4px; border:1px solid #444;">Mejor lectura RIP</td>
+        </tr>
+        <tr>
+          <td style="padding:4px; border:1px solid #444;">Optimización Tinta</td>
+          <td style="padding:4px; border:1px solid #444;">Menor consumo</td>
+        </tr>
+        <tr>
+          <td style="padding:4px; border:1px solid #444;">Sep. Blanco</td>
+          <td style="padding:4px; border:1px solid #444;">Mayor precisión</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- VIDEO -->
+  <div style="width:40%;">
+    <iframe
+      width="100%"
+      height="200"
+      src="https://www.youtube.com/embed/1f2IQqyMXN0"
+      frameborder="0"
+      allowfullscreen
+      style="border:1px solid #444;">
+    </iframe>
+  </div>
+
+</div>
+
 </div>
 
 <!-- APP -->
 <div id="appContainer">
 
-<h1>CLEANMASK</h1>
+<h1>CLEANMASK V4.0</h1>
 <h2 class="subtitle">Detector y Corrector de Semitransparencias – by editablesgraficos</h2>
 
 <input type="file" id="fileInput" accept="image/*">
@@ -261,7 +344,7 @@ d[i+3]=255;
 ctxO.putImageData(imgData,0,0);
 ctxS.clearRect(0,0,canvasS.width,canvasS.height);
 
-msg.innerHTML='<span style="color:#4CAF50;">✅ LIMPIEZA APLICADA</span>';
+msg.innerHTML='<span style="color:#4CAF50;">✅ LIMPIEZA APLICADA haga clic en exportar para descargarla</span>';
 cleanBtn.style.display='none';
 exportBtn.style.display='flex';
 });
