@@ -1,324 +1,459 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CLEANMASK V4 – Detector y Corrector de Semitransparencias</title>
 <style>
-body{margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#1e1e1e;color:white}
-/* Login */
-#loginContainer{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;gap:15px}
-#loginContainer input{padding:10px 15px;border-radius:5px;border:none;font-size:16px;width:250px}
-#loginContainer button{padding:10px;background:linear-gradient(to bottom,#00bfff,#006f9a);color:white;font-size:16px;border:none;border-radius:5px;cursor:pointer;transition:.2s}
-#loginContainer button:hover{background:linear-gradient(to bottom,#006f9a,#00bfff)}
-#loginMsg{color:#F44336;font-weight:bold;}
-/* App */
-#appContainer{display:none;}
-h1{text-align:center;font-size:36px;color:#00bfff;text-shadow:0 0 10px #00bfff;margin-bottom:5px}
-h2.subtitle{text-align:center;font-size:18px;color:#00ffff;margin-bottom:20px;font-weight:normal}
-#fileInput{display:block;margin:0 auto 20px auto;padding:10px 15px;border-radius:5px;border:none;background:#333;color:white;font-size:16px;cursor:pointer}
-.main-panel{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
-.canvas-panel{display:flex;flex-direction:column;gap:20px}
-.viewers{display:flex;flex-direction:row;gap:20px}
-.viewer{background:#222;border-radius:8px;padding:10px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.7);width:350px;height:500px;display:flex;flex-direction:column;align-items:center}
-.viewer h3{margin:0 0 10px 0;font-size:16px;color:#00ffff;text-shadow:0 0 3px #00ffff}
-canvas{width:100%;height:100%;background:#1c1c1c;border-radius:5px;border:1px solid #444;box-shadow:inset 0 0 10px rgba(0,0,0,0.5)}
-.sidebar{width:220px;display:flex;flex-direction:column;gap:15px;background:#2a2a2a;border-radius:8px;padding:15px;box-shadow:0 0 20px rgba(0,0,0,0.8);align-items:center}
-.buttons{display:flex;flex-direction:column;gap:10px;width:100%}
-button.action-btn{padding:10px;background:linear-gradient(to bottom,#00bfff,#006f9a);color:white;font-size:16px;border:none;border-radius:5px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px}
-button.action-btn:hover{background:linear-gradient(to bottom,#006f9a,#00bfff);box-shadow:0 0 10px #00bfff}
-button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-#msg{text-align:center;font-weight:bold;font-size:14px}
-#exportMsg{display:flex;justify-content:center;}
-#loader{display:none;margin:20px auto;text-align:center;}
-@media(max-width:900px){.main-panel{flex-direction:column;align-items:center}.sidebar{width:90%;margin-top:20px}.viewers{flex-direction:column;gap:20px}.viewer{width:90%;height:400px}}
+    :root {
+        --bg-main: #0f172a;
+        --bg-card: #1e293b;
+        --accent: #38bdf8;
+        --accent-hover: #0284c7;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --danger: #ef4444;
+        --success: #22c55e;
+        --magenta: #ff00ff;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+        margin: 0; padding: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-main);
+    }
+
+    /* --- LOGIN --- */
+    #loginContainer {
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        min-height: 100vh; gap: 15px; background: var(--bg-main);
+    }
+    .login-box {
+        background: var(--bg-card); padding: 40px; border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 400px;
+    }
+    .login-box h1 { font-size: 28px; color: var(--accent); margin: 0 0 10px 0; }
+    .login-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+    .login-box input {
+        width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px;
+        border: 1px solid #334155; background: #0f172a; color: white; outline: none;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-box button {
+        width: 100%; padding: 12px; background: var(--accent); color: #fff;
+        border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;
+    }
+    .login-box button:hover { background: var(--accent-hover); }
+    #loginMsg { color: var(--danger); font-size: 14px; margin-top: 10px; font-weight: bold;}
+    .colaboracion { margin-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .btn-wsp {
+        display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #25D366;
+        color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.3s;
+    }
+    .btn-wsp:hover { background-color: #1ebc5a; }
+
+    /* --- APP PRINCIPAL --- */
+    #appContainer { display: none; padding: 30px 20px; max-width: 1300px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: var(--accent); margin: 0 0 5px 0; font-size: 32px; }
+    .header h2 { color: var(--text-muted); font-size: 16px; font-weight: normal; margin: 0; }
+
+    /* Drag & Drop Zone */
+    .drop-zone {
+        border: 2px dashed var(--accent); border-radius: 12px; padding: 40px 20px;
+        text-align: center; background: rgba(56, 189, 248, 0.05); cursor: pointer;
+        transition: all 0.3s; margin-bottom: 30px;
+    }
+    .drop-zone:hover, .drop-zone.dragover { background: rgba(56, 189, 248, 0.15); border-color: #7dd3fc; }
+    .drop-zone p { margin: 0; font-size: 16px; color: var(--accent); font-weight: 500; }
+    .drop-zone input[type="file"] { display: none; }
+
+    .main-panel { display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
+    
+    /* Visores - AJUSTADO PARA ESTAR LADO A LADO */
+    .viewers { 
+        display: flex; 
+        flex-direction: row; /* Fuerza la dirección horizontal */
+        gap: 20px; 
+        flex: 1; /* Ocupa el espacio restante quitando la barra lateral */
+        min-width: 0; 
+    }
+    .viewer {
+        flex: 1; /* Ambos visores toman exactamente el 50% de la fila */
+        background: var(--bg-card); 
+        border-radius: 12px; 
+        padding: 15px; 
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+        height: 550px; /* Más altos para mejor visibilidad */
+        display: flex; 
+        flex-direction: column;
+    }
+    .viewer h3 { margin: 0 0 10px 0; font-size: 15px; color: var(--text-muted); }
+    .canvas-container { flex: 1; background: #111827; border-radius: 8px; overflow: hidden; position: relative; }
+    
+    /* Solución de distorsión */
+    canvas {
+        width: 100%; height: 100%; object-fit: contain; display: block;
+        background-image: linear-gradient(45deg, #222 25%, transparent 25%), 
+                          linear-gradient(-45deg, #222 25%, transparent 25%), 
+                          linear-gradient(45deg, transparent 75%, #222 75%), 
+                          linear-gradient(-45deg, transparent 75%, #222 75%);
+        background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    /* Sidebar / Controles */
+    .sidebar {
+        width: 280px; background: var(--bg-card); border-radius: 12px; padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px;
+        flex-shrink: 0; /* Evita que la barra lateral se aplaste */
+    }
+    #msg { text-align: center; font-size: 15px; line-height: 1.4; margin: 0; }
+    
+    .slider-container { display: none; flex-direction: column; gap: 5px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;}
+    .slider-container label { font-size: 13px; color: var(--text-muted); display: flex; justify-content: space-between; }
+    input[type=range] { width: 100%; accent-color: var(--accent); }
+
+    button.action-btn {
+        width: 100%; padding: 12px; background: var(--accent); color: white;
+        font-size: 15px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s;
+    }
+    button.action-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+    button.action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    /* Loader CSS */
+    #loader { display: none; text-align: center; margin: 20px 0; }
+    .spinner {
+        width: 40px; height: 40px; border: 4px solid rgba(56, 189, 248, 0.2);
+        border-top-color: var(--accent); border-radius: 50%;
+        animation: spin 1s linear infinite; margin: 0 auto 10px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsividad (Móviles) */
+    @media(max-width: 900px) {
+        .main-panel { flex-direction: column; align-items: stretch; }
+        .viewers { flex-direction: column; } /* En móviles se ponen uno abajo del otro */
+        .sidebar { width: 100%; }
+        .viewer { height: 400px; }
+    }
 </style>
 </head>
-<body oncontextmenu="return false">
+<body>
 
 <!-- LOGIN -->
 <div id="loginContainer">
-<h1>CLEANMASK V4 – Login</h1>
-<br>Detector y corrector de semitransparencias</br>
-<input type="text" id="username" placeholder="Usuario">
-<input type="password" id="password" placeholder="Contraseña">
-<button onclick="login()">Ingresar</button>
-<p id="loginMsg"></p>
-<p style="color:white; text-align:center; margin-top:15px; font-size:11px;">
-      Estamos ofreciendo acceso exclusivo a nuestra aplicación con una pequeña colaboración de $2200 mensuales (2usd).
-      </br>MUCHAS GRACIAS a todas aquellas personas que ya se sumaron y apoyan nuestro trabajo.
- </br> </br>
-      ATTE STAFF
-      EDITABLEAGRAFICOS
-</br> </br>
-   <a href="whatsapp://send?phone=5492613904628&text=Buen%20dia%21%20estoy%20interesado%2Fa%20en%20un%20dise%C3%B1o%20o%20servicio" 
-       style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#25D366; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">
-      Solicitar suscripción
-    </a>
-</p>
+    <div class="login-box">
+        <h1>CLEANMASK V4</h1>
+        <p>Detector y corrector de semitransparencias</p>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña" onkeypress="if(event.key === 'Enter') login()">
+        <button onclick="login()">Ingresar al sistema</button>
+        <p id="loginMsg"></p>
+        
+        <div class="colaboracion">
+            Ofrecemos acceso exclusivo a nuestra aplicación con una colaboración de $2200 mensuales (2usd).<br><br>
+            ¡MUCHAS GRACIAS a quienes ya apoyan nuestro trabajo!<br><br>
+            ATTE STAFF EDITABLEAGRAFICOS
+        </div>
+        
+        <a href="whatsapp://send?phone=5492613904628&text=Buen%20dia%21%20estoy%20interesado%2Fa%20en%20un%20dise%C3%B1o%20o%20servicio" class="btn-wsp">
+            📲 Solicitar suscripción
+        </a>
+    </div>
 </div>
 
 <!-- APP -->
 <div id="appContainer">
-<h1>CLEANMASK</h1>
-<h2 class="subtitle">Detector y Corrector de Semitransparencias – by editablesgraficos</h2>
-<input type="file" id="fileInput" accept="image/*">
-<div id="loader">⏳ Procesando imagen...</div>
+    <div class="header">
+        <h1>CLEANMASK</h1>
+        <h2>Detector y Corrector de Semitransparencias</h2>
+    </div>
 
-<div class="main-panel">
-<div class="canvas-panel">
-<div class="viewers">
-<div class="viewer">
-<h3>🖼️ Visor 1 – Original</h3>
-<canvas id="canvasOriginal"></canvas>
-</div>
-<div class="viewer">
-<h3>💡 Visor 2 – Semitransparencias</h3>
-<canvas id="canvasSemi"></canvas>
-</div>
-</div>
-</div>
+    <div class="drop-zone" id="dropZone">
+        <p>📁 Arrastra tu imagen aquí o haz clic para seleccionarla</p>
+        <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp">
+    </div>
 
-<div class="sidebar">
-<h3 id="msg">Sube una imagen para analizar</h3>
-<div class="buttons">
-<button id="cleanBtn" class="action-btn" style="display:none;">🧹 Limpiar imagen</button>
-</div>
-<div id="exportMsg">
-<button id="exportBtn" class="action-btn" style="display:none;">💾 Exportar PNG 300 DPI</button>
-</div>
-</div>
-</div>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div style="color: var(--accent);">Procesando imagen...</div>
+    </div>
+
+    <div class="main-panel" id="mainPanel" style="display: none;">
+        <div class="viewers">
+            <div class="viewer">
+                <h3>🖼️ Original / Resultado</h3>
+                <div class="canvas-container">
+                    <canvas id="canvasOriginal"></canvas>
+                </div>
+            </div>
+            <div class="viewer">
+                <h3>💡 Detector (Errores en Magenta)</h3>
+                <div class="canvas-container">
+                    <canvas id="canvasSemi"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div id="msg">Sube una imagen para analizar</div>
+            
+            <div class="slider-container" id="thresholdContainer">
+                <label>
+                    <span>Umbral de dureza:</span>
+                    <span id="thresholdValue">128</span>
+                </label>
+                <input type="range" id="thresholdSlider" min="1" max="254" value="128">
+                <small style="color:var(--text-muted); font-size: 11px; margin-top:5px; text-align:center;">
+                    Menos = Más partes se borran<br>Más = Más partes se vuelven sólidas
+                </small>
+            </div>
+
+            <button id="cleanBtn" class="action-btn" style="display:none;">🧹 Limpiar Imagen</button>
+            <button id="exportBtn" class="action-btn" style="display:none; background: var(--success);">💾 Exportar PNG 300 DPI</button>
+        </div>
+    </div>
 </div>
 
 <!-- LOGIN SCRIPT -->
 <script>
-
 const users = {
-
-"USR001":"c2QzM2gyMGs=",
-"USR002":"eTdwMWJqNGE=",
-"USR003":"bW9jOXQ1c2E=",
-"USR004":"ajk3bWQzcGI=",
-"USR005":"dTY1cGoxczQ=",
-"USR006":"cDhzNHIwcGJh",
-"USR007":"aGg4cDQ1eW0=",
-"USR008":"dXMxMWc0dA==",
-"USR009":"dWw4djIzMw==",
-"USR010":"ajU1NDM=",
-"USR011":"b2c0ajVzY2E=",
-"USR012":"cHQzaW44azE=",
-"USR013":"aU5ONTQ1NQ==",
-"USR014":"dWg1bDQ3c2k=",
-"USR015":"aG01dTJyM3A=",
-"USR016":"c3cxMTRt", 
-"USR017":"bTkwcGpsNmE=",
-"USR018":"b3M3MXB3",
-"USR019":"dWw4V1c0",
-"USR020":"cG04aHIzcGY=",
-"USR021":"a2tQTE8xMzg=",
-"USR022":"dXRLaDU1YWE=",
-"USR023":"c3U3bm0wY3E=",
-"USR024":"aW8yNTVHVAA=",
-"USR025":"Y2VzYXJpdG8xMjM=",
-"USR026":"eWU5MkU3Ng==",
-"USR027":"YWFSMzMx",
-"USR028":"dHRyMzQ=",
-"USR029":"azJoZDc2YQ==",
-"USR030":"R0hUZDcx",
-"USR031":"NzFlZGZm",
-"USR032":"eVQzMWJn",
-"USR033":"dHQ5Y0Z0",
-"USR034":"VFl0MjQ=",
-"USR035":"Z29kVGYz",
-"USR036":"aWllS3Q0",
-"USR037":"VmZyYUQz",
-"USR038":"aWlhcjI0",
-"USR039":"WXQzM29w",
-"USR040":"MzR2cnRF",
-"USR041":"TWF4MXI3",
-"USR042":"ZHRmMTEx",
-"USR043":"a281VDM=",
-"USR044":"aERURjY=",
-"USR045":"SDRkMzU=",
-"USR046":"UzNuczNS",
-"USR047":"S3AyRjc=",
-"USR048":"NTVHMlA=",
-"USR049":"MTRGVDM=",
-"USR050":"YnRlRjg=",
-"USR051":"ZmVEVEYz",
-"USR052":"T1BPMjVl",
-"USR053":"a2syM3g=",
-"USR054":"WVUzOTI="
+    "USR001":"c2QzM2gyMGs=", "USR002":"eTdwMWJqNGE=", "USR003":"bW9jOXQ1c2E=",
+    "USR004":"ajk3bWQzcGI=", "USR005":"dTY1cGoxczQ=", "USR006":"cDhzNHIwcGJh",
+    "USR007":"aGg4cDQ1eW0=", "USR008":"dXMxMWc0dA==", "USR009":"dWw4djIzMw==",
+    "USR010":"ajU1NDM=", "USR011":"b2c0ajVzY2E=", "USR012":"cHQzaW44azE=",
+    "USR013":"aU5ONTQ1NQ==", "USR014":"dWg1bDQ3c2k=", "USR015":"aG01dTJyM3A=",
+    "USR016":"c3cxMTRt",  "USR017":"bTkwcGpsNmE=", "USR018":"b3M3MXB3",
+    "USR019":"dWw4V1c0", "USR020":"cG04aHIzcGY=", "USR021":"a2tQTE8xMzg=",
+    "USR022":"dXRLaDU1YWE=", "USR023":"c3U3bm0wY3E=", "USR024":"aW8yNTVHVAA=",
+    "USR025":"Y2VzYXJpdG8xMjM=", "USR026":"eWU5MkU3Ng==", "USR027":"YWFSMzMx",
+    "USR028":"dHRyMzQ=", "USR029":"azJoZDc2YQ==", "USR030":"R0hUZDcx",
+    "USR031":"NzFlZGZm", "USR032":"eVQzMWJn", "USR033":"dHQ5Y0Z0",
+    "USR034":"VFl0MjQ=", "USR035":"Z29kVGYz", "USR036":"aWllS3Q0",
+    "USR037":"VmZyYUQz", "USR038":"aWlhcjI0", "USR039":"WXQzM29w",
+    "USR040":"MzR2cnRF", "USR041":"TWF4MXI3", "USR042":"ZHRmMTEx",
+    "USR043":"a281VDM=", "USR044":"aERURjY=", "USR045":"SDRkMzU=",
+    "USR046":"UzNuczNS", "USR047":"S3AyRjc=", "USR048":"NTVHMlA=",
+    "USR049":"MTRGVDM=", "USR050":"YnRlRjg=", "USR051":"ZmVEVEYz",
+    "USR052":"T1BPMjVl", "USR053":"a2syM3g=", "USR054":"WVUzOTI="
 };
 function login() {
-  const user = document.getElementById("username").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  const loginMsg = document.getElementById("loginMsg");
-  if(users[user] && atob(users[user]) === pass){
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("appContainer").style.display = "block";
-  } else {
-    loginMsg.textContent = "Usuario o contraseña incorrectos";
-  }
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    const loginMsg = document.getElementById("loginMsg");
+    if(users[user] && atob(users[user]) === pass){
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("appContainer").style.display = "block";
+    } else {
+        loginMsg.textContent = "Usuario o contraseña incorrectos";
+    }
 }
 </script>
 
-<!-- SCRIPT MASK -->
+<!-- APP SCRIPT -->
 <script>
-const fileInput=document.getElementById('fileInput');
-const msg=document.getElementById('msg');
-const canvasO=document.getElementById('canvasOriginal');
-const ctxO=canvasO.getContext('2d');
-const canvasS=document.getElementById('canvasSemi');
-const ctxS=canvasS.getContext('2d');
-const cleanBtn=document.getElementById('cleanBtn');
-const exportBtn=document.getElementById('exportBtn');
-const loader=document.getElementById('loader');
-let originalImg=new Image();
-let processedImageData=null;
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const msg = document.getElementById('msg');
+const canvasO = document.getElementById('canvasOriginal');
+const ctxO = canvasO.getContext('2d', { willReadFrequently: true });
+const canvasS = document.getElementById('canvasSemi');
+const ctxS = canvasS.getContext('2d', { willReadFrequently: true });
+const cleanBtn = document.getElementById('cleanBtn');
+const exportBtn = document.getElementById('exportBtn');
+const loader = document.getElementById('loader');
+const mainPanel = document.getElementById('mainPanel');
+const thresholdContainer = document.getElementById('thresholdContainer');
+const thresholdSlider = document.getElementById('thresholdSlider');
+const thresholdValue = document.getElementById('thresholdValue');
 
-fileInput.addEventListener('change',e=>{
-  const file=e.target.files[0];
-  if(!file) return;
-  loader.style.display='block';
-  const url=URL.createObjectURL(file);
-  originalImg.onload=()=>{
-    canvasO.width=originalImg.width;
-    canvasO.height=originalImg.height;
-    canvasS.width=originalImg.width;
-    canvasS.height=originalImg.height;
-    drawImageFit(ctxO,originalImg,canvasO.width,canvasO.height);
-    detectSemis();
-    loader.style.display='none';
-  };
-  originalImg.src=url;
+let originalImg = new Image();
+let originalFileName = "imagen_procesada";
+
+// Actualizar valor del slider UI
+thresholdSlider.addEventListener('input', (e) => {
+    thresholdValue.textContent = e.target.value;
 });
 
-function drawImageFit(ctx,img,cw,ch){
-  ctx.clearRect(0,0,cw,ch);
-  const ratio=Math.min(cw/img.width,ch/img.height);
-  const w=img.width*ratio;
-  const h=img.height*ratio;
-  const x=(cw-w)/2;
-  const y=(ch-h)/2;
-  ctx.drawImage(img,x,y,w,h);
-}
-
-function detectSemis(){
-  const imgData=ctxO.getImageData(0,0,canvasO.width,canvasO.height);
-  const d=imgData.data;
-  let hasSemi=false;
-  for(let i=0;i<d.length;i+=4){
-    const a=d[i+3];
-    if(a>0&&a<255){hasSemi=true;break;}
-  }
-  if(!hasSemi){
-    msg.innerHTML='<span style="color:#4CAF50; font-size:25px;">✅ ESTA IMAGEN ESTA LIMPIA</span><br>Apta para imprimir!';
-    cleanBtn.style.display='none';
-    exportBtn.style.display='flex';
-    exportBtn.disabled=false;
-    ctxS.clearRect(0,0,canvasS.width,canvasS.height);
-    return;
-  }
-  msg.innerHTML='<span style="color:#F44336; font-size:25px;">❌ IMAGEN NO APTA PARA IMPRIMIR</span><br>En el visor 2 se pueden ver los píxeles excedentes en blanco.';
-  ctxS.clearRect(0,0,canvasS.width,canvasS.height);
-  ctxS.globalAlpha=0.3;
-  drawImageFit(ctxS,originalImg,canvasS.width,canvasS.height);
-  ctxS.globalAlpha=1;
-  const semiMask=ctxS.getImageData(0,0,canvasS.width,canvasS.height);
-  const m=semiMask.data;
-  for(let i=0;i<m.length;i+=4){
-    const a=d[i+3];
-    if(a>0 && a<255){
-      m[i]=m[i+1]=m[i+2]=255;
-      m[i+3]=255;
-    } else { m[i+3]=0; }
-  }
-  ctxS.putImageData(semiMask,0,0);
-  cleanBtn.style.display='flex';
-  cleanBtn.disabled=false;
-  exportBtn.style.display='none';
-}
-
-// LIMPIAR IMAGEN MEJORADO
-cleanBtn.addEventListener('click',()=>{
-  const imgData = ctxO.getImageData(0,0,canvasO.width,canvasO.height);
-  const d = imgData.data;
-  
-  for(let i=0; i<d.length; i+=4){
-    const alpha = d[i+3];
-    if(alpha > 0 && alpha < 255){
-      d[i+3] = 255;
+// Eventos de Drag & Drop
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
     }
-  }
+});
 
-  ctxO.putImageData(imgData,0,0);
-  processedImageData = imgData;
+fileInput.addEventListener('change', e => {
+    if(e.target.files.length) handleFile(e.target.files[0]);
+});
 
-  ctxS.clearRect(0,0,canvasS.width,canvasS.height);
-  msg.innerHTML='<span style="color:#4CAF50;">✅ SEMITRANSPARENCIAS LIMPIAS! TU IMAGEN YA ESTA LISTA PARA SER EXPORTADA</span>';
-  cleanBtn.style.display='none';
-  exportBtn.style.display='flex';
-  exportBtn.disabled=false;
+function handleFile(file) {
+    if(!file.type.startsWith('image/')) return;
+    
+    originalFileName = file.name.split('.').slice(0, -1).join('.') || "imagen";
+    
+    loader.style.display = 'block';
+    mainPanel.style.display = 'none';
+    cleanBtn.style.display = 'none';
+    exportBtn.style.display = 'none';
+    thresholdContainer.style.display = 'none';
+
+    const url = URL.createObjectURL(file);
+    originalImg.onload = () => {
+        canvasO.width = originalImg.width;
+        canvasO.height = originalImg.height;
+        canvasS.width = originalImg.width;
+        canvasS.height = originalImg.height;
+        
+        ctxO.clearRect(0, 0, canvasO.width, canvasO.height);
+        ctxO.drawImage(originalImg, 0, 0);
+        
+        setTimeout(detectSemis, 50); 
+    };
+    originalImg.src = url;
+}
+
+function detectSemis() {
+    mainPanel.style.display = 'flex';
+    const imgData = ctxO.getImageData(0, 0, canvasO.width, canvasO.height);
+    const d = imgData.data;
+    let hasSemi = false;
+    
+    ctxS.clearRect(0, 0, canvasS.width, canvasS.height);
+    ctxS.globalAlpha = 0.5;
+    ctxS.drawImage(originalImg, 0, 0);
+    ctxS.globalAlpha = 1.0;
+    
+    const semiMask = ctxS.getImageData(0, 0, canvasS.width, canvasS.height);
+    const m = semiMask.data;
+
+    for(let i = 0; i < d.length; i += 4) {
+        const a = d[i+3];
+        if(a > 0 && a < 255) {
+            hasSemi = true;
+            m[i] = 255;   // R
+            m[i+1] = 0;   // G
+            m[i+2] = 255; // B
+            m[i+3] = 255; // Alpha
+        }
+    }
+
+    ctxS.putImageData(semiMask, 0, 0);
+    loader.style.display = 'none';
+
+    if(!hasSemi) {
+        msg.innerHTML = '<span style="color:var(--success); font-size:18px; font-weight:bold;">✅ IMAGEN LIMPIA</span><br><br>Apta para imprimir.';
+        exportBtn.style.display = 'block';
+        ctxS.clearRect(0,0,canvasS.width,canvasS.height);
+    } else {
+        msg.innerHTML = '<span style="color:var(--danger); font-size:18px; font-weight:bold;">❌ SEMITRANSPARENCIAS DETECTADAS</span><br><br>Revisa los píxeles magenta en el visor.';
+        thresholdContainer.style.display = 'flex';
+        cleanBtn.style.display = 'block';
+    }
+}
+
+cleanBtn.addEventListener('click', () => {
+    loader.style.display = 'block';
+    cleanBtn.disabled = true;
+    
+    setTimeout(() => {
+        const threshold = parseInt(thresholdSlider.value);
+        const imgData = ctxO.getImageData(0, 0, canvasO.width, canvasO.height);
+        const d = imgData.data;
+        
+        for(let i = 0; i < d.length; i += 4) {
+            const alpha = d[i+3];
+            if(alpha > 0 && alpha < 255) {
+                if (alpha < threshold) {
+                    d[i+3] = 0;   
+                } else {
+                    d[i+3] = 255; 
+                }
+            }
+        }
+
+        ctxO.putImageData(imgData, 0, 0);
+        ctxS.clearRect(0, 0, canvasS.width, canvasS.height);
+        
+        msg.innerHTML = '<span style="color:var(--success); font-size:18px; font-weight:bold;">✅ IMAGEN LIMPIADA</span><br><br>Lista para exportar.';
+        thresholdContainer.style.display = 'none';
+        cleanBtn.style.display = 'none';
+        cleanBtn.disabled = false;
+        exportBtn.style.display = 'block';
+        loader.style.display = 'none';
+    }, 50);
 });
 
 // EXPORTAR PNG 300 DPI
-exportBtn.addEventListener('click',()=>{exportPNG300();});
+exportBtn.addEventListener('click', exportPNG300);
 
-function exportPNG300(){
-  const url=canvasO.toDataURL("image/png");
-  const bin=atob(url.split(',')[1]);
-  const arr=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-  const dpi=300;
-  const ppm=Math.round(dpi/0.0254);
-  const phys=new Uint8Array([(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,(ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,1]);
-  const name=new TextEncoder().encode("pHYs");
-  const chunk=buildChunk(name,phys);
-  const finalPNG=insertAfterIHDR(arr,chunk);
-  const blob=new Blob([finalPNG],{type:"image/png"});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download="cleaned_300dpi.png";
-  a.click();
+function exportPNG300() {
+    const url = canvasO.toDataURL("image/png");
+    const bin = atob(url.split(',')[1]);
+    const arr = new Uint8Array(bin.length);
+    for(let i=0; i<bin.length; i++) arr[i] = bin.charCodeAt(i);
+    
+    const dpi = 300;
+    const ppm = Math.round(dpi / 0.0254);
+    const phys = new Uint8Array([
+        (ppm>>24)&255, (ppm>>16)&255, (ppm>>8)&255, ppm&255,
+        (ppm>>24)&255, (ppm>>16)&255, (ppm>>8)&255, ppm&255, 1
+    ]);
+    
+    const name = new TextEncoder().encode("pHYs");
+    const chunk = buildChunk(name, phys);
+    const finalPNG = insertAfterIHDR(arr, chunk);
+    
+    const blob = new Blob([finalPNG], {type: "image/png"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${originalFileName}_clean_300dpi.png`;
+    a.click();
 }
 
-function buildChunk(type,data){
-  const len=data.length;
-  const chunk=new Uint8Array(8+len+4);
-  chunk[0]=0;chunk[1]=0;chunk[2]=0;chunk[3]=len;
-  chunk.set(type,4);
-  chunk.set(data,8);
-  const crc=crc32(chunk.slice(4,8+len));
-  chunk[8+len]=(crc>>>24)&255;
-  chunk[9+len]=(crc>>>16)&255;
-  chunk[10+len]=(crc>>>8)&255;
-  chunk[11+len]=crc&255;
-  return chunk;
+function buildChunk(type, data) {
+    const len = data.length;
+    const chunk = new Uint8Array(8 + len + 4);
+    chunk[0]=0; chunk[1]=0; chunk[2]=0; chunk[3]=len;
+    chunk.set(type, 4);
+    chunk.set(data, 8);
+    const crc = crc32(chunk.slice(4, 8 + len));
+    chunk[8+len] = (crc>>>24)&255;
+    chunk[9+len] = (crc>>>16)&255;
+    chunk[10+len] = (crc>>>8)&255;
+    chunk[11+len] = crc&255;
+    return chunk;
 }
 
-function insertAfterIHDR(png,chunk){
-  let pos=8;
-  const ihdrLen=(png[pos]<<24)|(png[pos+1]<<16)|(png[pos+2]<<8)|png[pos+3];
-  const after=pos+12+ihdrLen;
-  const out=new Uint8Array(png.length+chunk.length);
-  out.set(png.slice(0,after),0);
-  out.set(chunk,after);
-  out.set(png.slice(after),after+chunk.length);
-  return out;
+function insertAfterIHDR(png, chunk) {
+    let pos = 8;
+    const ihdrLen = (png[pos]<<24) | (png[pos+1]<<16) | (png[pos+2]<<8) | png[pos+3];
+    const after = pos + 12 + ihdrLen;
+    const out = new Uint8Array(png.length + chunk.length);
+    out.set(png.slice(0, after), 0);
+    out.set(chunk, after);
+    out.set(png.slice(after), after + chunk.length);
+    return out;
 }
 
-function crc32(buf){
-  let table=[];
-  for(let i=0;i<256;i++){
-    let c=i;
-    for(let k=0;k<8;k++)c=((c&1)?(0xEDB88320^(c>>>1)):(c>>>1));
-    table[i]=c;
-  }
-  let crc=-1;
-  for(let i=0;i<buf.length;i++)crc=(crc>>>8)^table[(crc^buf[i])&255];
-  return(crc^(-1))>>>0;
+function crc32(buf) {
+    let table = [];
+    for(let i=0; i<256; i++) {
+        let c = i;
+        for(let k=0; k<8; k++) c = ((c&1) ? (0xEDB88320^(c>>>1)) : (c>>>1));
+        table[i] = c;
+    }
+    let crc = -1;
+    for(let i=0; i<buf.length; i++) crc = (crc>>>8)^table[(crc^buf[i])&255];
+    return (crc^(-1))>>>0;
 }
 </script>
 </body>
