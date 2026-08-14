@@ -73,22 +73,22 @@
 
     .main-panel { display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
     
-    /* Visores - AJUSTADO PARA ESTAR LADO A LADO */
+    /* Visores */
     .viewers { 
         display: flex; 
-        flex-direction: row; /* Fuerza la dirección horizontal */
+        flex-direction: row; 
         gap: 20px; 
-        flex: 1; /* Ocupa el espacio restante quitando la barra lateral */
+        flex: 1; 
         min-width: 0; 
     }
     .viewer {
-        flex: 1; /* Ambos visores toman exactamente el 50% de la fila */
+        flex: 1; 
         background: var(--bg-card); 
         border-radius: 12px; 
         padding: 15px; 
         text-align: center;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-        height: 550px; /* Más altos para mejor visibilidad */
+        height: 550px; 
         display: flex; 
         flex-direction: column;
     }
@@ -109,7 +109,7 @@
     .sidebar {
         width: 280px; background: var(--bg-card); border-radius: 12px; padding: 25px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px;
-        flex-shrink: 0; /* Evita que la barra lateral se aplaste */
+        flex-shrink: 0;
     }
     #msg { text-align: center; font-size: 15px; line-height: 1.4; margin: 0; }
     
@@ -136,7 +136,7 @@
     /* Responsividad (Móviles) */
     @media(max-width: 900px) {
         .main-panel { flex-direction: column; align-items: stretch; }
-        .viewers { flex-direction: column; } /* En móviles se ponen uno abajo del otro */
+        .viewers { flex-direction: column; }
         .sidebar { width: 100%; }
         .viewer { height: 400px; }
     }
@@ -171,8 +171,7 @@
     <div class="header">
         <h1>CLEANMASK V4</h1>
         <h2>Detector y Corrector de Semitransparencias</h2>
-        <p>Upgrade 14/08/2026</p>
-        
+        <p>Upgrade 14/08/2026 - Umbral de dureza configurable - Panel estadístico - Mejora grafica</p>
     </div>
 
     <div class="drop-zone" id="dropZone">
@@ -203,6 +202,17 @@
 
         <div class="sidebar">
             <div id="msg">Sube una imagen para analizar</div>
+            
+            <!-- PANEL DE ESTADÍSTICAS -->
+            <div id="statsContainer" style="display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+                <h4 style="margin: 0 0 10px 0; color: var(--accent); border-bottom: 1px solid #334155; padding-bottom: 5px;">📊 Estadísticas</h4>
+                <div style="display: flex; justify-content: space-between;"><span>Resolución:</span> <strong id="statRes" style="color: white;"></strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>Píx. totales:</span> <strong id="statTotal" style="color: white;"></strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>Semi-transp:</span> <strong id="statSemi" style="color: var(--danger);"></strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>Afectación:</span> <strong id="statSemiPerc" style="color: var(--danger);"></strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>Sólidos:</span> <strong id="statSolid" style="color: white;"></strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>Transparentes:</span> <strong id="statTrans" style="color: white;"></strong></div>
+            </div>
             
             <div class="slider-container" id="thresholdContainer">
                 <label>
@@ -307,6 +317,7 @@ function handleFile(file) {
     cleanBtn.style.display = 'none';
     exportBtn.style.display = 'none';
     thresholdContainer.style.display = 'none';
+    document.getElementById('statsContainer').style.display = 'none'; // Ocultar estadísticas previas
 
     const url = URL.createObjectURL(file);
     originalImg.onload = () => {
@@ -327,7 +338,14 @@ function detectSemis() {
     mainPanel.style.display = 'flex';
     const imgData = ctxO.getImageData(0, 0, canvasO.width, canvasO.height);
     const d = imgData.data;
+    
     let hasSemi = false;
+    
+    // VARIABLES PARA ESTADÍSTICAS
+    let semiCount = 0;
+    let solidCount = 0;
+    let transCount = 0;
+    const totalPixels = d.length / 4;
     
     ctxS.clearRect(0, 0, canvasS.width, canvasS.height);
     ctxS.globalAlpha = 0.5;
@@ -339,8 +357,15 @@ function detectSemis() {
 
     for(let i = 0; i < d.length; i += 4) {
         const a = d[i+3];
-        if(a > 0 && a < 255) {
+        
+        // CONTAR PÍXELES
+        if (a === 0) {
+            transCount++;
+        } else if (a === 255) {
+            solidCount++;
+        } else {
             hasSemi = true;
+            semiCount++;
             m[i] = 255;   // R
             m[i+1] = 0;   // G
             m[i+2] = 255; // B
@@ -351,10 +376,25 @@ function detectSemis() {
     ctxS.putImageData(semiMask, 0, 0);
     loader.style.display = 'none';
 
+    // ACTUALIZAR PANEL DE ESTADÍSTICAS
+    document.getElementById('statsContainer').style.display = 'block';
+    document.getElementById('statRes').textContent = `${canvasO.width} × ${canvasO.height} px`;
+    document.getElementById('statTotal').textContent = totalPixels.toLocaleString('es-ES');
+    document.getElementById('statSemi').textContent = semiCount.toLocaleString('es-ES');
+    document.getElementById('statSemiPerc').textContent = ((semiCount / totalPixels) * 100).toFixed(2) + '%';
+    document.getElementById('statSolid').textContent = ((solidCount / totalPixels) * 100).toFixed(2) + '%';
+    document.getElementById('statTrans').textContent = ((transCount / totalPixels) * 100).toFixed(2) + '%';
+    
+    document.getElementById('statSemi').style.color = "var(--danger)";
+    document.getElementById('statSemiPerc').style.color = "var(--danger)";
+
     if(!hasSemi) {
         msg.innerHTML = '<span style="color:var(--success); font-size:18px; font-weight:bold;">✅ IMAGEN LIMPIA</span><br><br>Apta para imprimir.';
         exportBtn.style.display = 'block';
         ctxS.clearRect(0,0,canvasS.width,canvasS.height);
+        
+        document.getElementById('statSemi').style.color = "var(--success)";
+        document.getElementById('statSemiPerc').style.color = "var(--success)";
     } else {
         msg.innerHTML = '<span style="color:var(--danger); font-size:18px; font-weight:bold;">❌ SEMITRANSPARENCIAS DETECTADAS</span><br><br>Revisa los píxeles magenta en el visor.';
         thresholdContainer.style.display = 'flex';
@@ -371,6 +411,10 @@ cleanBtn.addEventListener('click', () => {
         const imgData = ctxO.getImageData(0, 0, canvasO.width, canvasO.height);
         const d = imgData.data;
         
+        let newSolid = 0;
+        let newTrans = 0;
+        const totalPixels = d.length / 4;
+        
         for(let i = 0; i < d.length; i += 4) {
             const alpha = d[i+3];
             if(alpha > 0 && alpha < 255) {
@@ -380,11 +424,23 @@ cleanBtn.addEventListener('click', () => {
                     d[i+3] = 255; 
                 }
             }
+            
+            // Recalcular estadísticas después de limpiar
+            if (d[i+3] === 0) newTrans++;
+            else if (d[i+3] === 255) newSolid++;
         }
 
         ctxO.putImageData(imgData, 0, 0);
         ctxS.clearRect(0, 0, canvasS.width, canvasS.height);
         
+        // ACTUALIZAR ESTADÍSTICAS A 0 ERRORES
+        document.getElementById('statSemi').textContent = "0";
+        document.getElementById('statSemiPerc').textContent = "0.00%";
+        document.getElementById('statSolid').textContent = ((newSolid / totalPixels) * 100).toFixed(2) + '%';
+        document.getElementById('statTrans').textContent = ((newTrans / totalPixels) * 100).toFixed(2) + '%';
+        document.getElementById('statSemi').style.color = "var(--success)";
+        document.getElementById('statSemiPerc').style.color = "var(--success)";
+
         msg.innerHTML = '<span style="color:var(--success); font-size:18px; font-weight:bold;">✅ IMAGEN LIMPIADA</span><br><br>Lista para exportar.';
         thresholdContainer.style.display = 'none';
         cleanBtn.style.display = 'none';
